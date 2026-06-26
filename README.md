@@ -155,37 +155,7 @@ Raw CSV
 
 ---
 
-## 🚀 Getting Started
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/yourusername/datamind.git
-cd datamind
-```
-
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Set Your Groq API Key
-```bash
-# Create a .env file
-echo "GROQ_API_KEY=your_api_key_here" > .env
-```
-> Get your free API key at [console.groq.com](https://console.groq.com)
-
-### 4. Run the Application
-```bash
-uvicorn back:app --reload
-```
-
-### 5. Open in Browser
-```
-http://127.0.0.1:8000
-```
-
----
 
 ## 📋 Requirements
 
