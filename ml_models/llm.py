@@ -7,7 +7,7 @@ llm = ChatGroq(
     api_key="",
     temperature=0.2,
     max_tokens=50
-)
+)   
 
 
 prompt = ChatPromptTemplate.from_messages(
