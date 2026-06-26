@@ -37,21 +37,7 @@ From preprocessing to model comparison, EDA to predictions, and an AI chatbot th
 | 💬 **AI Chatbot** | LangChain + Groq powered assistant for your dataset |
 | 🔄 **Raw vs Processed** | Compare data distributions before and after preprocessing |
 
----
 
-## 🖼️ Screenshots
-
-> *Add your screenshots here*
-
-| Home | Results | EDA Report |
-|---|---|---|
-| ![Home]() | ![Results]() | ![EDA]() |
-
-| Insights | AI Chatbot | ROC Curve |
-|---|---|---|
-| ![Insights]() | ![Chatbot]() | ![ROC]() |
-
----
 
 ## 🧩 Architecture
 
