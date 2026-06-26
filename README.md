@@ -252,17 +252,11 @@ Contributions are welcome! Feel free to:
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a Pull Request
 
----
 
-## 📄 License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-
----
 
 <div align="center">
 
-Made with ❤️ by **[Your Name](https://github.com/yourusername)**
+Made with ❤️ by **[Tarun2931](https://github.com/yourusername)**
 
 ⭐ **Star this repo if you found it useful!** ⭐
 
