@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Explorer — DataMind</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#070B17;color:white;padding:45px;overflow-x:hidden;min-height:100vh;}
+body::before{content:"";position:fixed;width:650px;height:650px;background:#2563eb;left:-250px;top:-250px;filter:blur(180px);opacity:.25;border-radius:50%;z-index:-2;}
+body::after{content:"";position:fixed;width:650px;height:650px;background:#8b5cf6;right:-250px;bottom:-250px;filter:blur(180px);opacity:.22;border-radius:50%;z-index:-2;}
+.wrap{max-width:1450px;margin:auto;}
+.page-title{font-size:48px;font-weight:700;margin-bottom:35px;background:linear-gradient(90deg,#4facfe,#9f67ff);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-fill-color:transparent;}
+.card-box{background:rgba(17,24,39,.82);backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:35px;margin-bottom:30px;box-shadow:0 20px 40px rgba(0,0,0,.35);transition:.3s;}
+.card-box:hover{transform:translateY(-3px);box-shadow:0 20px 50px rgba(37,99,235,.25);}
+.section-title{font-size:20px;font-weight:600;margin-bottom:22px;color:#e2e8f0;display:flex;align-items:center;gap:10px;}
+.section-title i{font-size:22px;}
+
+/* Dataset toggle */
+.dataset-toggle{display:flex;gap:12px;margin-bottom:24px;}
+.toggle-btn{flex:1;padding:14px 20px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.25s;font-family:'Poppins',sans-serif;}
+.toggle-btn.active{background:rgba(37,99,235,.2);border-color:rgba(37,99,235,.5);color:#4facfe;}
+.toggle-btn:hover:not(.active){background:rgba(255,255,255,.07);color:#e2e8f0;}
+
+/* Graph type cards */
+.graph-type-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;}
+.graph-card{padding:18px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#94a3b8;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:.25s;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.graph-card i{font-size:26px;}
+.graph-card.active{background:rgba(37,99,235,.18);border-color:rgba(37,99,235,.5);color:#4facfe;}
+.graph-card:hover:not(.active){background:rgba(255,255,255,.08);color:#e2e8f0;transform:translateY(-2px);}
+
+/* Column selects */
+.col-section{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px;}
+.col-section.single{grid-template-columns:1fr;}
+label.field-label{display:block;font-size:13px;font-weight:500;color:#94a3b8;margin-bottom:8px;letter-spacing:.4px;}
+select.dm-select{width:100%;background:#0f172a;border:1px solid #263246;height:54px;border-radius:12px;font-size:15px;color:white;padding:0 16px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;cursor:pointer;font-family:'Poppins',sans-serif;transition:.25s;}
+select.dm-select:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 18px rgba(37,99,235,.35);}
+
+/* Generate button */
+.btn-generate{width:100%;height:58px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#8b5cf6);border:none;color:white;font-size:17px;font-weight:600;cursor:pointer;transition:.35s;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Poppins',sans-serif;}
+.btn-generate:hover{transform:translateY(-3px);box-shadow:0 15px 35px rgba(37,99,235,.40);}
+.btn-generate:active{transform:translateY(0);}
+
+/* Graph output area */
+.graph-output{min-height:420px;border-radius:18px;border:1.5px dashed rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#475569;font-size:15px;background:rgba(255,255,255,.02);transition:.3s;position:relative;overflow:hidden;}
+.graph-output.has-img{border-style:solid;border-color:rgba(79,172,254,.22);background:#0D1320;padding:18px;}
+.graph-output img{
+  width:100%;
+  display:block;
+  border-radius:14px;
+  border:1px solid rgba(79,172,254,.18);
+  box-shadow:0 0 32px rgba(79,172,254,.10),0 8px 24px rgba(0,0,0,.5);
+  /* Invert white bg → dark, then hue-rotate+saturate to match site palette */
+  filter:invert(1) hue-rotate(180deg) saturate(1.15) brightness(0.92);
+}
+.graph-output .placeholder-icon{font-size:52px;color:#334155;}
+.graph-output .placeholder-text{font-size:14px;color:#475569;}
+
+/* Model eval section */
+.eval-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.eval-btn{padding:18px 20px;border-radius:16px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#e2e8f0;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.25s;text-decoration:none;font-family:'Poppins',sans-serif;}
+.eval-btn i{font-size:22px;color:#4facfe;}
+.eval-btn:hover{background:rgba(37,99,235,.15);border-color:rgba(37,99,235,.4);color:white;transform:translateY(-2px);}
+.eval-btn .eval-label{font-size:11px;color:#64748b;margin-top:2px;}
+
+/* Nav bar at top */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;}
+.topbar-logo{font-size:28px;font-weight:800;letter-spacing:-1px;background:linear-gradient(90deg,#4facfe,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.topbar-links{display:flex;gap:10px;}
+.topbar-link{padding:9px 20px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#94a3b8;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;text-decoration:none;display:flex;align-items:center;gap:6px;}
+.topbar-link:hover{background:rgba(255,255,255,.09);color:white;}
+.topbar-link.active{background:rgba(37,99,235,.18);border-color:rgba(37,99,235,.45);color:#4facfe;}
+
+/* Loading spinner */
+.spinner{display:none;width:24px;height:24px;border:3px solid rgba(79,172,254,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.generating .spinner{display:block;}
+.generating .btn-icon{display:none;}
+
+/* Responsive */
+@media(max-width:768px){
+  body{padding:25px;}
+  .page-title{font-size:32px;}
+  .graph-type-grid{grid-template-columns:repeat(3,1fr);}
+  .col-section{grid-template-columns:1fr;}
+  .topbar-links{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+  <h1 class="page-title">
+    <i class="bi bi-bar-chart-line me-3" style="font-size:42px;vertical-align:middle;"></i>Graph Explorer
+  </h1>
+
+  <!-- EDA Graphs Card -->
+  <div class="card-box">
+    <h2 class="section-title">
+      <i class="bi bi-graph-up-arrow" style="color:#4facfe;"></i>EDA Graphs
+    </h2>
+
+    <!-- Dataset Toggle -->
+    <div style="margin-bottom:6px;font-size:12px;color:#64748b;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">Dataset</div>
+    <div class="dataset-toggle">
+      <button class="toggle-btn active" data-val="Raw" onclick="setDataset(this)">
+        <i class="bi bi-database"></i> Raw Data
+      </button>
+      <button class="toggle-btn" data-val="Processed" onclick="setDataset(this)">
+        <i class="bi bi-gear"></i> Processed Data
+      </button>
+    </div>
+
+    <!-- Graph Type -->
+    <div style="margin-bottom:10px;font-size:12px;color:#64748b;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">Graph Type</div>
+    <div class="graph-type-grid">
+      <div class="graph-card active" data-val="Histogram" onclick="setGraph(this)">
+        <i class="bi bi-bar-chart-fill"></i>Histogram
+      </div>
+      <div class="graph-card" data-val="Boxplot" onclick="setGraph(this)">
+        <i class="bi bi-box"></i>Boxplot
+      </div>
+      <div class="graph-card" data-val="Scatter Plot" onclick="setGraph(this)">
+        <i class="bi bi-diagram-3"></i>Scatter Plot
+      </div>
+      <div class="graph-card" data-val="Heatmap" onclick="setGraph(this)">
+        <i class="bi bi-grid-3x3-gap-fill"></i>Heatmap
+      </div>
+      <div class="graph-card" data-val="Countplot" onclick="setGraph(this)">
+        <i class="bi bi-bar-chart-steps"></i>Countplot
+      </div>
+    </div>
+
+    <form action="/generate_graph" method="post" id="graphForm">
+      <input type="hidden" name="dataset_type" id="hiddenDataset" value="Raw">
+      <input type="hidden" name="graph_type" id="hiddenGraph" value="Histogram">
+
+      <!-- Numerical (histogram/boxplot) -->
+      <div id="numerical_div" class="col-section single">
+        <div>
+          <label class="field-label">Column</label>
+          <select name="column" id="column" class="dm-select"></select>
+        </div>
+      </div>
+
+      <!-- Categorical (countplot) -->
+      <div id="categorical_div" class="col-section single" style="display:none;">
+        <div>
+          <label class="field-label">Category Column</label>
+          <select name="category_column" id="category_column" class="dm-select"></select>
+        </div>
+      </div>
+
+      <!-- Scatter -->
+      <div id="scatter_div" class="col-section" style="display:none;">
+        <div>
+          <label class="field-label">X Column</label>
+          <select name="x_column" id="x_column" class="dm-select"></select>
+        </div>
+        <div>
+          <label class="field-label">Y Column</label>
+          <select name="y_column" id="y_column" class="dm-select"></select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-generate" id="genBtn">
+        <i class="bi bi-lightning-charge-fill btn-icon"></i>
+        <div class="spinner"></div>
+        Generate Graph
+      </button>
+    </form>
+  </div>
+
+  <!-- Graph Output -->
+  {% if graph_path %}
+  <div class="card-box">
+    <h2 class="section-title">
+      <i class="bi bi-image" style="color:#a78bfa;"></i>Generated Graph
+    </h2>
+    <div class="graph-output has-img">
+      <img src="{{ graph_path }}" alt="Generated graph" style="max-width:100%;border-radius:12px;">
+    </div>
+  </div>
+  {% else %}
+  <div class="card-box">
+    <h2 class="section-title">
+      <i class="bi bi-image" style="color:#a78bfa;"></i>Generated Graph
+    </h2>
+    <div class="graph-output">
+      <div class="placeholder-icon"><i class="bi bi-bar-chart"></i></div>
+      <div class="placeholder-text">Select options above and generate a graph</div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Model Evaluation -->
+  <div class="card-box">
+    <h2 class="section-title">
+      <i class="bi bi-cpu" style="color:#34d399;"></i>Model Evaluation
+    </h2>
+    <div class="eval-grid">
+
+      {% if problem_type == "regression" %}
+      <a href="/actual_vs_predicted" class="eval-btn">
+        <i class="bi bi-graph-up"></i>
+        <div>
+          <div>Actual vs Predicted</div>
+          <div class="eval-label">Regression</div>
+        </div>
+      </a>
+      <a href="/residual_plot" class="eval-btn">
+        <i class="bi bi-activity"></i>
+        <div>
+          <div>Residual Plot</div>
+          <div class="eval-label">Regression</div>
+        </div>
+      </a>
+      {% endif %}
+
+      {% if problem_type == "classification" %}
+      <a href="/roc_curve" class="eval-btn">
+        <i class="bi bi-graph-up-arrow"></i>
+        <div>
+          <div>ROC Curve</div>
+          <div class="eval-label">Classification</div>
+        </div>
+      </a>
+      
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Hidden JSON data injected by Jinja2 -->
+<script type="application/json" id="rawNumericalData">{{ numerical_columns | tojson }}</script>
+<script type="application/json" id="rawCategoricalData">{{ categorical_columns | tojson }}</script>
+<script type="application/json" id="processedNumericalData">{{ processed_numerical_columns | tojson }}</script>
+<script type="application/json" id="processedCategoricalData">{{ processed_categorical_columns | tojson }}</script>
+
+<script>
+  function safeParse(id){try{return JSON.parse(document.getElementById(id).textContent);}catch(e){return [];}}
+  const rawNum = safeParse('rawNumericalData');
+  const rawCat = safeParse('rawCategoricalData');
+  const procNum = safeParse('processedNumericalData');
+  const procCat = safeParse('processedCategoricalData');
+
+  let currentDataset = 'Raw';
+  let currentGraph = 'Histogram';
+
+  function setDataset(btn){
+    document.querySelectorAll('.toggle-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDataset = btn.dataset.val;
+    document.getElementById('hiddenDataset').value = currentDataset;
+    updateColumns();
+  }
+
+  function setGraph(card){
+    document.querySelectorAll('.graph-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    currentGraph = card.dataset.val;
+    document.getElementById('hiddenGraph').value = currentGraph;
+    updateVisibility();
+  }
+
+  function fillSelect(id, arr){
+    const s = document.getElementById(id);
+    s.innerHTML = arr.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+
+  function updateColumns(){
+    const num = currentDataset==='Raw'?rawNum:procNum;
+    const cat = currentDataset==='Raw'?rawCat:procCat;
+    fillSelect('column', num);
+    fillSelect('category_column', cat);
+    fillSelect('x_column', num);
+    fillSelect('y_column', num);
+  }
+
+  function updateVisibility(){
+    document.getElementById('numerical_div').style.display='none';
+    document.getElementById('categorical_div').style.display='none';
+    document.getElementById('scatter_div').style.display='none';
+    if(currentGraph==='Histogram'||currentGraph==='Boxplot')
+      document.getElementById('numerical_div').style.display='';
+    else if(currentGraph==='Countplot')
+      document.getElementById('categorical_div').style.display='';
+    else if(currentGraph==='Scatter Plot')
+      document.getElementById('scatter_div').style.display='';
+  }
+
+  document.getElementById('graphForm').addEventListener('submit',function(){
+    const btn = document.getElementById('genBtn');
+    btn.classList.add('generating');
+    btn.disabled = true;
+  });
+
+  updateColumns();
+  updateVisibility();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

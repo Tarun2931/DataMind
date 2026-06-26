@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Insights</title>
+</head>
+
+<body>
+
+    <h1>Insights Page</h1>
+
+    <form action="/generate_graph" method="post">
+
+        <h3>Select Dataset</h3>
+
+        <input
+            type="radio"
+            name="dataset_type"
+            value="Raw"
+            checked
+        >
+        Raw Data
+
+        <br>
+
+        <input
+            type="radio"
+            name="dataset_type"
+            value="Processed"
+        >
+        Processed Data
+
+        <br><br>
+
+        <label>Graph Type</label>
+
+        <select
+            id="graph_type"
+            name="graph_type"
+        >
+
+            <option value="Histogram">Histogram</option>
+
+            <option value="Boxplot">Boxplot</option>
+
+            <option value="Scatter Plot">Scatter Plot</option>
+
+            <option value="Heatmap">Heatmap</option>
+
+            <option value="Countplot">Countplot</option>
+
+        </select>
+
+        <br><br>
+
+        <!-- Numerical Column -->
+
+        <div id="numerical_div">
+
+            <label>Column</label>
+
+            <select
+                id="column"
+                name="column"
+            >
+
+            </select>
+
+        </div>
+
+
+        <!-- Categorical Column -->
+
+        <div
+            id="categorical_div"
+            style="display:none;"
+        >
+
+            <label>Column</label>
+
+            <select
+                id="category_column"
+                name="category_column"
+            >
+
+            </select>
+
+        </div>
+
+
+        <!-- Scatter Plot -->
+
+        <div
+            id="scatter_div"
+            style="display:none;"
+        >
+
+            <label>X Column</label>
+
+            <select
+                id="x_column"
+                name="x_column"
+            >
+
+            </select>
+
+            <br><br>
+
+            <label>Y Column</label>
+
+            <select
+                id="y_column"
+                name="y_column"
+            >
+
+            </select>
+
+        </div>
+
+        <br>
+
+        <button type="submit">
+
+            Generate Graph
+
+        </button>
+
+    </form>
+
+    <hr>
+
+    {% if graph_path %}
+
+    <h2>Generated Graph</h2>
+
+    <img
+        src="{{ graph_path }}"
+        width="900"
+    >
+
+    {% endif %}
+
+    <!-- Store Jinja variables -->
+
+    <script type="application/json" id="rawNumericalData">
+        {{ numerical_columns | tojson }}
+    </script>
+
+    <script type="application/json" id="rawCategoricalData">
+        {{ categorical_columns | tojson }}
+    </script>
+
+    <script type="application/json" id="processedNumericalData">
+        {{ processed_numerical_columns | tojson }}
+    </script>
+
+    <script type="application/json" id="processedCategoricalData">
+        {{ processed_categorical_columns | tojson }}
+    </script>
+
+
+    <script>
+
+        const rawNumerical = JSON.parse(
+            document.getElementById(
+                "rawNumericalData"
+            ).textContent
+        );
+
+        const rawCategorical = JSON.parse(
+            document.getElementById(
+                "rawCategoricalData"
+            ).textContent
+        );
+
+        const processedNumerical = JSON.parse(
+            document.getElementById(
+                "processedNumericalData"
+            ).textContent
+        );
+
+        const processedCategorical = JSON.parse(
+            document.getElementById(
+                "processedCategoricalData"
+            ).textContent
+        );
+
+        const graphType = document.getElementById(
+            "graph_type"
+        );
+
+        const numericalDiv = document.getElementById(
+            "numerical_div"
+        );
+
+        const categoricalDiv = document.getElementById(
+            "categorical_div"
+        );
+
+        const scatterDiv = document.getElementById(
+            "scatter_div"
+        );
+
+        const radios = document.getElementsByName(
+            "dataset_type"
+        );
+
+
+        function updateColumns() {
+
+            let datasetType = document.querySelector(
+                'input[name="dataset_type"]:checked'
+            ).value;
+
+            let numericalData;
+            let categoricalData;
+
+            if (datasetType === "Raw") {
+
+                numericalData = rawNumerical;
+
+                categoricalData = rawCategorical;
+
+            }
+
+            else {
+
+                numericalData = processedNumerical;
+
+                categoricalData = processedCategorical;
+
+            }
+
+            let columnSelect =
+                document.getElementById(
+                    "column"
+                );
+
+            columnSelect.innerHTML = "";
+
+            numericalData.forEach(function (col) {
+
+                columnSelect.innerHTML +=
+                    `<option value="${col}">
+                        ${col}
+                    </option>`;
+
+            });
+
+            let categorySelect =
+                document.getElementById(
+                    "category_column"
+                );
+
+            categorySelect.innerHTML = "";
+
+            categoricalData.forEach(function (col) {
+
+                categorySelect.innerHTML +=
+                    `<option value="${col}">
+                        ${col}
+                    </option>`;
+
+            });
+
+            let xSelect =
+                document.getElementById(
+                    "x_column"
+                );
+
+            xSelect.innerHTML = "";
+
+            numericalData.forEach(function (col) {
+
+                xSelect.innerHTML +=
+                    `<option value="${col}">
+                        ${col}
+                    </option>`;
+
+            });
+
+            let ySelect =
+                document.getElementById(
+                    "y_column"
+                );
+
+            ySelect.innerHTML = "";
+
+            numericalData.forEach(function (col) {
+
+                ySelect.innerHTML +=
+                    `<option value="${col}">
+                        ${col}
+                    </option>`;
+
+            });
+
+        }
+
+        graphType.addEventListener(
+            "change",
+            function () {
+
+                if (
+                    graphType.value === "Histogram"
+                    ||
+                    graphType.value === "Boxplot"
+                ) {
+
+                    numericalDiv.style.display = "block";
+
+                    categoricalDiv.style.display = "none";
+
+                    scatterDiv.style.display = "none";
+
+                }
+
+                else if (
+                    graphType.value === "Countplot"
+                ) {
+
+                    numericalDiv.style.display = "none";
+
+                    categoricalDiv.style.display = "block";
+
+                    scatterDiv.style.display = "none";
+
+                }
+
+                else if (
+                    graphType.value === "Scatter Plot"
+                ) {
+
+                    numericalDiv.style.display = "none";
+
+                    categoricalDiv.style.display = "none";
+
+                    scatterDiv.style.display = "block";
+
+                }
+
+                else if (
+                    graphType.value === "Heatmap"
+                ) {
+
+                    numericalDiv.style.display = "none";
+
+                    categoricalDiv.style.display = "none";
+
+                    scatterDiv.style.display = "none";
+
+                }
+
+            }
+        );
+
+        radios.forEach(
+            radio =>
+                radio.addEventListener(
+                    "change",
+                    updateColumns
+                )
+        );
+
+        updateColumns();
+
+    </script>
+
+</body>
+
+</html>
